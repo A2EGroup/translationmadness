@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html style="background-color:green">
+  <head>
+    <title>Translation Madness!</title>
+    <description>Create a sentence and watch it become more and more distorted as it gets translated through language after language!
+    Ever feel like traslating to differet languages doesn't quite sound right? Well try going through 50 languages and see how different your phrase is than what it was before! You will never find so much fun with other languages in your life!</description>
+    <style>
+      .invisible {
+        opacity:0;
+      }
+      .middle {
+        position:fixed;
+        bottom: 50vh;
+        right: 0;
+        width:100%;
+      }
+      div.halfPage {
+        width:100%;
+        height: 40vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      h1 {
+        text-shadow: 2px 2px 5px #000000;
+      }
+    </style>
+    <base target="_top">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!-- Compiled and minified CSS -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!-- Compiled and minified JavaScript -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      
+      <div class="halfPage valign-wrapper center-align">
+        <h1 class="center-align" style="color:white"><b>Translation Madness!</b></h1>
+      </div>
+      <div style="border-radius:15px;background-color:white">
+        <div style="padding-left:15px;padding-right:15px;padding-top:25px;padding-bottom:1px">
+          <div class="row">
+            <div class="col s10">
+                <input style="" placeholder="Type out your sentence to be translated" type="text" class="validate" minlength="1" id="input">
+            </div>
+            <div class="col s2">
+              <div style="padding-top:5px"><a class="waves-effect waves-light btn" onclick="start()" style="text-align:center;width:100%">Start</a></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+      <br>
+
+      <div class="row" id="dataRow" hidden>
+        <div style="border-radius:15px;background-color:white" class="col s12">
+          <div class="row" style="padding-left:15px;padding-right:15px;padding-top:18px;padding-bottom:0px">
+            <table class="highlight" style="padding:10px">
+              <thead><tr><th>Language</th><th>Translation</th><th>English</th></tr></thead>
+                <tbody id="displayTable"></tbody>
+            </table>
+          </div>
+          <div class="progress" id="progressRow">
+            <div class="determinate" style="width: 20%" id="progressBar"></div>
+          </div>
+          <div class="row left-align" style="padding-left:15px;padding-right:15px" id="preloader">
+            <i id="loadText"></i>
+          </div>
+          <div class="row right-align" style="padding-left:15px;padding-right:15px" id="loadMore">
+            <a class="waves-effect waves-light btn" onclick="continueData()"><i class="material-icons left">add_circle_outline</i>Load More</a>
+          </div>
+        </div>
+        <br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+      </div>
+
+
+    </div>
+    <script>
+      function start() {
+        document.getElementById('progressBar').className = "determinate";
+        document.getElementById('progressRow').className = "progress";
+        document.getElementById('loadMore').className = "row right-align hide";
+        document.getElementById('loadStatus').innerHTML = "0";
+        document.getElementById('dataRow').removeAttribute('hidden');
+        document.getElementById('preloader').removeAttribute('hidden');
+        makeData();
+        setLoadStatus();
+        window.scrollTo(0, 300);
+      }
+      
+      function makeData() {
+        document.getElementById("dataTable").innerHTML = ""
+        document.getElementById("displayTable").innerHTML = ""
+        var phrase = document.getElementById("input").value;
+        var url = "https://script.google.com/macros/s/AKfycbxObyjcEK4pTCtAvQK1mN9CvKPrlmnMKHd9xkZFozXqUBpAppTwKnZQM_hAzqweJ-PN/exec?action=make&phrase="+phrase;
+        link(url, getData);
+      }
+
+      function continueData() {
+        document.getElementById('progressBar').className = "determinate";
+        document.getElementById('progressRow').className = "progress";
+        document.getElementById('loadMore').className = "row right-align hide";
+        document.getElementById('loadStatus').innerHTML = "0";
+        document.getElementById('dataRow').removeAttribute('hidden');
+        document.getElementById('preloader').removeAttribute('hidden');
+        setLoadStatus();
+        var table = document.getElementById("displayTable");
+        var phrase = table.children[table.rows.length - 1].children[2].innerHTML;
+        var url = "https://script.google.com/macros/s/AKfycbxObyjcEK4pTCtAvQK1mN9CvKPrlmnMKHd9xkZFozXqUBpAppTwKnZQM_hAzqweJ-PN/exec?action=make&phrase="+phrase;
+        link(url, getData);
+      }
+
+      function getData(sheetName) {
+        var url = "https://script.google.com/macros/s/AKfycbxObyjcEK4pTCtAvQK1mN9CvKPrlmnMKHd9xkZFozXqUBpAppTwKnZQM_hAzqweJ-PN/exec?action=get&sheetName="+sheetName;
+        document.getElementById('sheetName').innerHTML = sheetName;
+        link(url, checkData);
+      }
+
+      function checkData(data) {
+        if (data == "ERROR") {
+          setTimeout(getData,500,document.getElementById('sheetName').innerHTML);
+          setLoadStatus()
+        } else {
+          loadData(data);
+        }
+      }
+
+      function loadData(data) {
+        document.getElementById('progressRow').className = "progress hide";
+        document.getElementById('preloader').setAttribute('hidden','true');
+        var table = document.getElementById("dataTable")
+        for (var i = 0; i < data.length; i++) {
+          var row = document.createElement("tr")
+          var td1 = document.createElement("td");
+          td1.innerHTML = getLanguage(data[i][2]);
+          var td2 = document.createElement("td");
+          td2.innerHTML = data[i][0];
+          var td3 = document.createElement("td");
+          td3.innerHTML = data[i][1];
+          row.appendChild(td1)
+          row.appendChild(td2)
+          row.appendChild(td3)
+          table.appendChild(row)
+        }
+        loadDisplay();
+      }
+
+      function loadDisplay() {
+        var dataTable = document.getElementById("dataTable");
+        var dataRow = dataTable.rows[0];
+        var table = document.getElementById("displayTable")
+        var row = document.createElement("tr")
+        var td1 = document.createElement("td");
+        td1.innerHTML = dataRow.children[0].innerHTML;
+        var td2 = document.createElement("td");
+        td2.innerHTML = dataRow.children[1].innerHTML;
+        var td3 = document.createElement("td");
+        td3.innerHTML = dataRow.children[2].innerHTML;
+        row.appendChild(td1)
+        row.appendChild(td2)
+        row.appendChild(td3)
+        table.appendChild(row)
+        window.scrollBy(0, 110)
+        
+        dataRow.remove()
+        if (dataTable.rows.length > 0) {
+          setTimeout(loadDisplay, 500);
+        } else {
+          document.getElementById('loadMore').className = "row right-align";
+        }
+      }
+      
+      function link(url, nextFunction) {
+        fetch(url).then(
+        function(response) {
+          response.json().then(function(data) {
+            nextFunction(data)
+          })
+        }).catch(function(error){
+            alert('Error: '+error)
+            //return 'Error: '+error
+          })
+      }
+
+      function setLoadStatus() {
+        var text = ["Firing up the translation engines...",
+        "Contacting the translation experts...",
+        "Going deeper into the translation rabbit hole...",
+        "Questioning the logic of the translation process...",
+        "Converting translations to semi-readable English...",
+        "Loading..."
+        ];
+        var status = Number(document.getElementById('loadStatus').innerHTML) + 1;
+        document.getElementById('loadText').innerHTML = text[status - 1];
+        if (status < 6) {
+          document.getElementById('progressBar').className = "determinate"
+          document.getElementById('loadStatus').innerHTML = status;
+          document.getElementById('progressBar').style = "width: "+String(Math.round(status / 5 * 100))+"%";
+        } else {
+          document.getElementById('progressBar').className = "indeterminate"
+        }
+      }
+
+      function getLanguage(code) {
+        var codes = ['af','sq','am','ar','hy','az','eu','be','bn','bs','bg','ca','ceb','zh-CN','zh-TW','co','hr','cs','da','nl','en','eo','et','fi','fr','fy','gl','ka','de','el','gu','ht','ha','haw','he','hi','hmn','hu','is','ig','id','ga','it','ja','jv','kn','kk','km','rw','ko','ku','ky','lo','la','lv','lt','lb','mk','mg','ms','ml','mt','mi','mr','mn','my','ne','no','ny','or','ps','fa','pl','pt','pa','ro','ru','sm','gd','sr','st','sn','sd','si','sk','sl','so','es','su','sw','sv','tl','tg','ta','tt','te','th','tr','tk','uk','ur','ug','uz','vi','cy','xh','yi','yo','zu'];
+        var languages = ['Afrikaans','Albanian','Amharic','Arabic','Armenian','Azerbaijani','Basque','Belarusian','Bengali','Bosnian','Bulgarian','Catalan','Cebuano','Chinese (Simplified)','Chinese (Traditional)','Corsican','Croatian','Czech','Danish','Dutch','English','Esperanto','Estonian','Finnish','French','Frisian','Galician','Georgian','German','Greek','Gujarati','Haitian Creole','Hausa','Hawaiian','Hebrew','Hindi','Hmong','Hungarian','Icelandic','Igbo','Indonesian','Irish','Italian','Japanese','Javanese','Kannada','Kazakh','Khmer','Kinyarwanda','Korean','Kurdish','Kyrgyz','Lao','Latin','Latvian','Lithuanian','Luxembourgish','Macedonian','Malagasy','Malay','Malayalam','Maltese','Maori','Marathi','Mongolian','Myanmar (Burmese)','Nepali','Norwegian','Nyanja (Chichewa)','Odia (Oriya)','Pashto','Persian','Polish','Portuguese (Portugal, Brazil)','Punjabi','Romanian','Russian','Samoan','Scots Gaelic','Serbian','Sesotho','Shona','Sindhi','Sinhala (Sinhalese)','Slovak','Slovenian','Somali','Spanish','Sundanese','Swahili','Swedish','Tagalog (Filipino)','Tajik','Tamil','Tatar','Telugu','Thai','Turkish','Turkmen','Ukrainian','Urdu','Uyghur','Uzbek','Vietnamese','Welsh','Xhosa','Yiddish','Yoruba','Zulu']
+        for (var i = 0; i < codes.length; i++) {
+          if (codes[i] == code) {
+            return languages[i];
+          }
+        }
+        return code;
+      }
+    </script>
+    <p id="sheetName" hidden></p>
+    <p id="loadStatus" hidden>0</p>
+    <table class="hide" hidden>
+      <tbody id="dataTable"></tbody>
+    </table>
+  </body>
+</html>
