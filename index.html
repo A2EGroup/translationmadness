@@ -38,6 +38,11 @@
       h1 {
         text-shadow: 2px 2px 5px #000000;
       }
+      .scrollButton {
+        position: fixed;
+        right: 50px;
+        bottom: 50px;
+      }
     </style>
     <base target="_top">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -47,7 +52,8 @@
     <!-- Compiled and minified JavaScript -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   </head>
-  <body>
+  <body onload="setInterval(scrollCheck,100);">
+    <div class="scrollButton hide" id="scrollButton"><a class="btn-floating btn-large waves-effect waves-light red" onclick="startScroll()"><i class="material-icons">expand_more</i></a></div>
     <div class="container">
       
       <div class="halfPage valign-wrapper center-align">
@@ -92,6 +98,7 @@
 
     </div>
     <script>
+
       function start() {
         document.getElementById('progressBar').className = "determinate";
         document.getElementById('progressRow').className = "progress";
@@ -176,13 +183,16 @@
         row.appendChild(td2)
         row.appendChild(td3)
         table.appendChild(row)
-        window.scrollBy(0, 110)
+        if (Number(document.getElementById('scrolling').innerHTML) == 1) {
+          window.scrollTo(0, 10000000000)
+        }
         
         dataRow.remove()
         if (dataTable.rows.length > 0) {
           setTimeout(loadDisplay, 500);
         } else {
           document.getElementById('loadMore').className = "row right-align";
+          window.scrollTo(0, 10000000000)
         }
       }
       
@@ -196,6 +206,35 @@
             alert('Error: '+error)
             //return 'Error: '+error
           })
+      }
+
+      function scrollCheck() {
+        if (document.getElementById("displayTable").rows.length > 0) {
+          var limit = Math.max(document.body.scrollHeight);
+          if (Number(document.getElementById('scrolling').innerHTML) == 1 || window.pageYOffset + 800 - limit > 0) {
+            //if at bottom still, keep autoscrolling and hide button
+            //if not at bottom, don't continue autoscrolling and make button show
+            if (window.pageYOffset + 800 - limit > 0) {
+              document.getElementById('scrollButton').className = "scrollButton hide"
+              document.getElementById('scrolling').innerHTML = "1"
+            } else {
+              document.getElementById('scrolling').innerHTML = "0"
+              document.getElementById('scrollButton').className = "scrollButton"
+            }
+          } else {
+            document.getElementById('scrollButton').className = "scrollButton"
+          }
+        } else {
+          document.getElementById('scrollButton').className = "scrollButton hide"
+        }
+      }
+
+      function startScroll() {
+        if (document.getElementById("displayTable").rows.length > 0) {
+          window.scrollTo(0, 10000000000)
+          document.getElementById('scrolling').innerHTML = "1"
+          document.getElementById('scrollButton').className = "scrollButton hide"
+        }
       }
 
       function setLoadStatus() {
@@ -230,6 +269,7 @@
     </script>
     <p id="sheetName" hidden></p>
     <p id="loadStatus" hidden>0</p>
+    <p id="scrolling" hidden>1</p>
     <table class="hide" hidden>
       <tbody id="dataTable"></tbody>
     </table>
